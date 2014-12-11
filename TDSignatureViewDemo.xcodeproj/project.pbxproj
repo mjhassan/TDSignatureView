@@ -14,6 +14,9 @@
 		AF5277E81A39916200CE96E4 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AF5277E71A39916200CE96E4 /* Images.xcassets */; };
 		AF5277EB1A39916200CE96E4 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = AF5277E91A39916200CE96E4 /* LaunchScreen.xib */; };
 		AF5277F71A39916200CE96E4 /* TDSignatureViewDemoTests.m in Sources */ = {isa = PBXBuildFile; fileRef = AF5277F61A39916200CE96E4 /* TDSignatureViewDemoTests.m */; };
+		AF52780D1A39920100CE96E4 /* cancel.png in Resources */ = {isa = PBXBuildFile; fileRef = AF5278091A39920100CE96E4 /* cancel.png */; };
+		AF52780E1A39920100CE96E4 /* cancel@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = AF52780A1A39920100CE96E4 /* cancel@2x.png */; };
+		AF52780F1A39920100CE96E4 /* TDSignatureView.m in Sources */ = {isa = PBXBuildFile; fileRef = AF52780C1A39920100CE96E4 /* TDSignatureView.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -40,6 +43,10 @@
 		AF5277F01A39916200CE96E4 /* TDSignatureViewDemoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TDSignatureViewDemoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AF5277F51A39916200CE96E4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AF5277F61A39916200CE96E4 /* TDSignatureViewDemoTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TDSignatureViewDemoTests.m; sourceTree = "<group>"; };
+		AF5278091A39920100CE96E4 /* cancel.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cancel.png; sourceTree = "<group>"; };
+		AF52780A1A39920100CE96E4 /* cancel@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "cancel@2x.png"; sourceTree = "<group>"; };
+		AF52780B1A39920100CE96E4 /* TDSignatureView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TDSignatureView.h; sourceTree = "<group>"; };
+		AF52780C1A39920100CE96E4 /* TDSignatureView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TDSignatureView.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -81,6 +88,7 @@
 		AF5277D91A39916100CE96E4 /* TDSignatureViewDemo */ = {
 			isa = PBXGroup;
 			children = (
+				AF5278081A39920100CE96E4 /* TDSignatureView */,
 				AF5277DE1A39916100CE96E4 /* AppDelegate.h */,
 				AF5277DF1A39916100CE96E4 /* AppDelegate.m */,
 				AF5277E11A39916100CE96E4 /* ViewController.h */,
@@ -118,6 +126,17 @@
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
+		};
+		AF5278081A39920100CE96E4 /* TDSignatureView */ = {
+			isa = PBXGroup;
+			children = (
+				AF5278091A39920100CE96E4 /* cancel.png */,
+				AF52780A1A39920100CE96E4 /* cancel@2x.png */,
+				AF52780B1A39920100CE96E4 /* TDSignatureView.h */,
+				AF52780C1A39920100CE96E4 /* TDSignatureView.m */,
+			);
+			path = TDSignatureView;
+			sourceTree = SOURCE_ROOT;
 		};
 /* End PBXGroup section */
 
@@ -199,9 +218,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AF52780E1A39920100CE96E4 /* cancel@2x.png in Resources */,
 				AF5277E61A39916100CE96E4 /* Main.storyboard in Resources */,
 				AF5277EB1A39916200CE96E4 /* LaunchScreen.xib in Resources */,
 				AF5277E81A39916200CE96E4 /* Images.xcassets in Resources */,
+				AF52780D1A39920100CE96E4 /* cancel.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -220,6 +241,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AF5277E31A39916100CE96E4 /* ViewController.m in Sources */,
+				AF52780F1A39920100CE96E4 /* TDSignatureView.m in Sources */,
 				AF5277E01A39916100CE96E4 /* AppDelegate.m in Sources */,
 				AF5277DD1A39916100CE96E4 /* main.m in Sources */,
 			);
