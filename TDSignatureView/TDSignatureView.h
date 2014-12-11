@@ -1,5 +1,5 @@
 //
-//  TRWrittingSlateView.h
+//  TDSignatureView.h
 //  Trinity Developers
 //
 //  Created by Jahid Hassan on 4/1/13.
@@ -8,9 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@class TRWrittingSlateView;
-
-@interface TRWrittingSlateView : UIView{
+@interface TDSignatureView : UIView{
     UIBezierPath *_bezierPath;
     CGPoint controlPoints[5];
     uint pointCounter;

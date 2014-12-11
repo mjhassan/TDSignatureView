@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>E3527838-1E2D-4D3B-B721-EC1EA45F022B</string>
+	<key>IDESourceControlProjectName</key>
+	<string>TDSignatureViewDemo</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>5DFEBBA398281D3A4A45615C9A778D5B40BE0EC0</key>
+		<string>https://github.com/mjhassan/TDSignatureView.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>TDSignatureViewDemo.xcodeproj</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>5DFEBBA398281D3A4A45615C9A778D5B40BE0EC0</key>
+		<string>../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/mjhassan/TDSignatureView.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>5DFEBBA398281D3A4A45615C9A778D5B40BE0EC0</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>5DFEBBA398281D3A4A45615C9A778D5B40BE0EC0</string>
+			<key>IDESourceControlWCCName</key>
+			<string>TDSignatureViewDemo</string>
+		</dict>
+	</array>
+</dict>
+</plist>

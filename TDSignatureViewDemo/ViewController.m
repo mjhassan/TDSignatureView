@@ -7,6 +7,7 @@
 //
 
 #import "ViewController.h"
+#import "TDSignatureView.h"
 
 @interface ViewController ()
 
@@ -17,6 +18,10 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
+    
+    TDSignatureView *signatureView = [[TDSignatureView alloc] initWithFrame:CGRectMake(432, 425, 160, 80)];
+    signatureView.backgroundColor = [UIColor purpleColor];
+    [self.view addSubview:signatureView];
 }
 
 - (void)didReceiveMemoryWarning {

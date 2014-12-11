@@ -1,14 +1,14 @@
 //
-//  TRWrittingSlateView.m
+//  TDSignatureView.m
 //  Trinity Developers
 //
 //  Created by Jahid Hassan on 4/1/13.
 //  Copyright (c) 2013 Jahid Hassan. All rights reserved.
 //
 
-#import "TRWrittingSlateView.h"
+#import "TDSignatureView.h"
 
-@implementation TRWrittingSlateView
+@implementation TDSignatureView
 @synthesize temporaryImage=_temporaryImage;
 
 - (id)init
