@@ -19,7 +19,7 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
     
-    TDSignatureView *signatureView = [[TDSignatureView alloc] initWithFrame:CGRectMake(432, 425, 160, 80)];
+    TDSignatureView *signatureView = [[TDSignatureView alloc] initWithFrame:CGRectMake(432, 425, 160, 120)];
     signatureView.backgroundColor = [UIColor purpleColor];
     [self.view addSubview:signatureView];
 }
