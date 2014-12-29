@@ -11,9 +11,10 @@
 @interface TDSignatureField() {CGPoint controlPoints[5];}
 @property (nonatomic, TD_STRONG) UIBezierPath *_bezierPath;
 @property (atomic, assign) uint pointCounter;
-@property (nonatomic, TD_STRONG) UIColor *_predefinedColor;
+@property (nonatomic, TD_STRONG) UIColor *fieldBackground;
 
-- (void)clearViewWithReset;
+- (void)doCanvasReset;
+- (void)closeCanvas;
 
 @end
 
@@ -140,13 +141,24 @@ NSInteger tagClose;
                                           completion:^(BOOL finished) {
                                               [overlayView removeFromSuperview];
                                               [signatureField removeFromSuperview];
-                                              [signatureField clearViewWithReset];
+                                              [self setPreview];
                                           }];
                      }];
 }
 
-#pragma mark - Notifications
+- (void)setPreview
+{
+    static NSInteger PREVIEW_TAG = 6671101;
+    UIGraphicsBeginImageContext(self.bounds.size);
+    [signatureField.image drawInRect:self.bounds];
+    UIImageView *imgview = [[UIImageView alloc] initWithImage:UIGraphicsGetImageFromCurrentImageContext()];
+    UIGraphicsEndImageContext();
+    imgview.tag = PREVIEW_TAG;
+    [[self viewWithTag:PREVIEW_TAG] removeFromSuperview];
+    [self addSubview:imgview];
+}
 
+#pragma mark - Notifications
 - (void)registerForNotifications
 {
     NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
@@ -168,6 +180,7 @@ NSInteger tagClose;
 - (void)setTransformForCurrentOrientation:(BOOL)animated
 {
     NSLog(@"Frame : %@", NSStringFromCGRect(self.bounds));
+    
     // Stay in sync with the superview
     if (overlayView) {
         [overlayView setFrame:inBounds];
@@ -201,7 +214,7 @@ NSInteger tagClose;
     UIImage *imgRaw;
 }
 @synthesize _bezierPath;
-@synthesize _predefinedColor;
+@synthesize fieldBackground;
 @synthesize pointCounter;
 
 - (id)init
@@ -231,19 +244,11 @@ NSInteger tagClose;
     return self;
 }
 
-- (void)drawRect:(CGRect)rect
-{
-    [imgRaw drawInRect:rect];
-    [_bezierPath stroke];
-}
-
 - (void)setPreferences
 {
     [self setUserInteractionEnabled:YES];
     [self setMultipleTouchEnabled:NO];
     
-    [self set_predefinedColor:[UIColor whiteColor]];
-    [self setBackgroundColor:self._predefinedColor];
     _bezierPath = [UIBezierPath bezierPath];
     [_bezierPath setLineWidth:2.0];
 }
@@ -269,15 +274,15 @@ NSInteger tagClose;
         controlPoints[0] = controlPoints[3];
         controlPoints[1] = controlPoints[4];
         pointCounter = 1;
+        
+        [self drawLineSegmentImage];
     }
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    [self drawLineSegmentImage];
     [self setNeedsDisplay];
     [_bezierPath removeAllPoints];
-    pointCounter = 0;
 }
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
@@ -287,10 +292,14 @@ NSInteger tagClose;
 
 - (void)drawLineSegmentImage
 {
+    if(!fieldBackground) {
+        [self setFieldBackground:self.backgroundColor];
+    }
+    
     UIGraphicsBeginImageContextWithOptions(self.bounds.size, YES, 0.0);
     if (!imgRaw){
         UIBezierPath *rectpath = [UIBezierPath bezierPathWithRect:self.bounds];
-        [self._predefinedColor setFill];
+        [fieldBackground setFill];
         [rectpath fill];
     }
     [imgRaw drawAtPoint:CGPointZero];
@@ -300,21 +309,16 @@ NSInteger tagClose;
     UIGraphicsEndImageContext();
     
     [self setImage:imgRaw];
+    pointCounter = 0;
 }
 
-- (void)clearViewWithReset
+- (void)doCanvasReset
 {
-    UIGraphicsBeginImageContextWithOptions(self.bounds.size, YES, 0x0lu);
-    CGContextRef context = UIGraphicsGetCurrentContext();
-    CGContextSetFillColorWithColor(context, self.backgroundColor.CGColor);
-    CGContextFillRect(context, self.bounds);
-    imgRaw = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
- 
+    imgRaw = nil;
     [self setImage:imgRaw];
 }
 
-- (UIImage *)getDrawingImage
+- (UIImage *)image
 {
     return imgRaw;
 }
