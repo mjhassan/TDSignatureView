@@ -15,10 +15,11 @@
 
 - (void)doCanvasReset;
 - (void)closeCanvas;
+- (void)saveSignature;
 
 @end
 
-@implementation TDSignatureView
+@implementation TDSignatureView { NSUserDefaults *userPreferences;}
 @synthesize overlayView;
 @synthesize signatureField;
 @synthesize inBounds;
@@ -52,6 +53,8 @@
 
 - (void)setPreferences
 {
+    userPreferences = [NSUserDefaults standardUserDefaults];
+    
     [self setUserInteractionEnabled:YES];
     [self setMultipleTouchEnabled:NO];
     
@@ -98,19 +101,73 @@
     
 }
 
-NSInteger tagClose;
 - (void)drawComponentes
 {
-    tagClose = 33112;
-    [[signatureField viewWithTag:tagClose] removeFromSuperview];
+    for(id sv in signatureField.subviews) [sv removeFromSuperview];
+    
+    CGFloat alpha = 0.6f;
+    
+    UIView *topView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, signatureField.bounds.size.width, 40)];
+    [topView setBackgroundColor:[UIColor blackColor]];
+    [topView setAlpha:alpha];
+    [signatureField addSubview:topView];
     
     UIButton *cancelButton = [UIButton buttonWithType:UIButtonTypeCustom];
     [cancelButton setTitle:@"Close" forState:UIControlStateNormal];
     [cancelButton setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
-    [cancelButton setFrame:CGRectMake(signatureField.bounds.size.width-80, 0.0f, 80, 30)];
+    [cancelButton setFrame:CGRectMake(signatureField.bounds.size.width-83, 5.0f, 80, 30)];
+    [cancelButton.layer setBorderWidth:1.f];
+    [cancelButton.layer setBorderColor:self.backgroundColor.CGColor];
+    [cancelButton.layer setCornerRadius:5.f];
     [cancelButton addTarget:self action:@selector(closeView:) forControlEvents:UIControlEventTouchUpInside];
-    [cancelButton setTag:tagClose];
     [signatureField addSubview:cancelButton];
+    
+    
+    CGFloat xOrigin = signatureField.bounds.size.width-83.f, yOrigin = signatureField.bounds.size.height-40.f;
+    
+    UIView *bottomView = [[UIView alloc] initWithFrame:CGRectMake(0, yOrigin, signatureField.bounds.size.width, 40)];
+    [bottomView setBackgroundColor:[UIColor blackColor]];
+    [bottomView setAlpha:alpha];
+    [signatureField addSubview:bottomView];
+    
+    UIButton *doneButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [doneButton setTitle:@"Done" forState:UIControlStateNormal];
+    [doneButton setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
+    [doneButton setFrame:CGRectMake(xOrigin, yOrigin+5.f, 80, 30)];
+    [doneButton.layer setBorderWidth:1.f];
+    [doneButton.layer setBorderColor:self.backgroundColor.CGColor];
+    [doneButton.layer setCornerRadius:5.f];
+    [doneButton addTarget:self action:@selector(closeView:) forControlEvents:UIControlEventTouchUpInside];
+    [signatureField addSubview:doneButton];
+    xOrigin -= doneButton.bounds.size.width+10.f;
+    
+    UIButton *resetButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [resetButton setTitle:@"Reset" forState:UIControlStateNormal];
+    [resetButton setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
+    [resetButton setFrame:CGRectMake(xOrigin, yOrigin+5.f, 80, 30)];
+    [resetButton.layer setBorderWidth:1.f];
+    [resetButton.layer setBorderColor:self.backgroundColor.CGColor];
+    [resetButton.layer setCornerRadius:5.f];
+    [resetButton addTarget:signatureField action:@selector(doCanvasReset) forControlEvents:UIControlEventTouchUpInside];
+    [signatureField addSubview:resetButton];
+    xOrigin -= doneButton.bounds.size.width+10.f;
+    
+    
+    UIButton *settingsButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [settingsButton setImage:[UIImage imageNamed:@"settings"] forState:UIControlStateNormal];
+    [settingsButton setFrame:CGRectMake(5.f, yOrigin+5.f, 30.f, 30.f)];
+    [settingsButton addTarget:self action:@selector(showSettings:) forControlEvents:UIControlEventTouchUpInside];
+    [signatureField addSubview:settingsButton];
+    
+    UIButton *storeButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [storeButton setTitle:@"Preview" forState:UIControlStateNormal];
+    [storeButton setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
+    [storeButton setFrame:CGRectMake(settingsButton.frame.origin.x+ settingsButton.frame.size.width+10.f, yOrigin+5.f, 80.f, 30.f)];
+    [storeButton.layer setBorderWidth:1.f];
+    [storeButton.layer setBorderColor:self.backgroundColor.CGColor];
+    [storeButton.layer setCornerRadius:5.f];
+    [storeButton addTarget:self action:@selector(showSettings:) forControlEvents:UIControlEventTouchUpInside];
+    [signatureField addSubview:storeButton];
 }
 
 - (void)performTapAction:(UITapGestureRecognizer *)gestureRecognizer
@@ -126,7 +183,47 @@ NSInteger tagClose;
     return CGRectMake(margin, (inBounds.size.height-height)/2, inBounds.size.width - 2*margin, height);
 }
 
+static NSInteger CLOSE_TAG = 1u << 8;
+static NSInteger SAVE_TAG = 1u << 16;
 - (void)closeView: (UIButton *)sender
+{
+    if ([(NSString *)[sender titleForState:UIControlStateNormal] caseInsensitiveCompare:@"CLOSE"] == NSOrderedSame) {
+        UIAlertView *closeAlert = [[UIAlertView alloc] initWithTitle:@"WARNING!" message:@"Closing action will lose signature. Do you really want to continue?" delegate:self cancelButtonTitle:@"NO" otherButtonTitles:@"YES", nil];
+        [closeAlert setTag:CLOSE_TAG];
+        [closeAlert show];
+    }else if ([(NSString *)[sender titleForState:UIControlStateNormal] caseInsensitiveCompare:@"DONE"] == NSOrderedSame)
+    {
+        if(![[userPreferences objectForKey:@"SaveAskPreference"] boolValue]) {
+        UIAlertView *closeAlert = [[UIAlertView alloc] initWithTitle:nil message:@"Do you want to save this signature?\nWARNING: Do not save signature if you are on shared device." delegate:self cancelButtonTitle:@"NO" otherButtonTitles:@"OK", nil];
+        
+        UIView *accessoryView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 250, 40)];
+        [accessoryView setBackgroundColor:[UIColor clearColor]];
+        UIButton *checkBoxButton = [[UIButton alloc] initWithFrame:CGRectMake(0.0, 5.0, 30.0, 30.0)];
+        [checkBoxButton setImage:[UIImage imageNamed:@"fancyUnchecked"] forState:UIControlStateNormal];
+        [checkBoxButton setImage:[UIImage imageNamed:@"fancyUnchecked"] forState:UIControlStateHighlighted];
+        [checkBoxButton setImage:[UIImage imageNamed:@"fancyChecked"] forState:UIControlStateSelected];
+        [checkBoxButton addTarget:self action:@selector(savePreferences:) forControlEvents:UIControlEventTouchUpInside];
+        [accessoryView addSubview:checkBoxButton];
+        UILabel *declaimer = [[UILabel alloc] initWithFrame:CGRectMake(30.f, 0, 220.f, 40)];
+        [declaimer setBackgroundColor:[UIColor clearColor]];
+        [declaimer setText:@"Don't show this message."];
+        [declaimer setFont:[UIFont systemFontOfSize:10.f]];
+        [accessoryView addSubview:declaimer];
+        [closeAlert setValue:accessoryView  forKey:@"accessoryView"];
+        
+        [closeAlert setTag:SAVE_TAG];
+        [closeAlert show];
+        } else {
+            [self closeActionWithPreview:YES];
+            if ([[userPreferences objectForKey:@"SavePreference"] boolValue]) {
+                [self saveSignatures];
+            }
+        }
+        
+    }
+}
+
+- (void)closeActionWithPreview:(BOOL)hasPreview
 {
     [UIView animateWithDuration:0.25
                      animations:^{
@@ -136,11 +233,12 @@ NSInteger tagClose;
                      completion:^(BOOL finished) {
                          [UIView animateWithDuration:0.25
                                           animations:^{
-                                            [signatureField setFrame:self.frame];
+                                              [signatureField setFrame:self.frame];
                                           }
                                           completion:^(BOOL finished) {
                                               [overlayView removeFromSuperview];
                                               [signatureField removeFromSuperview];
+                                              if(!hasPreview) [signatureField doCanvasReset];
                                               [self setPreview];
                                           }];
                      }];
@@ -156,6 +254,34 @@ NSInteger tagClose;
     imgview.tag = PREVIEW_TAG;
     [[self viewWithTag:PREVIEW_TAG] removeFromSuperview];
     [self addSubview:imgview];
+}
+
+- (void)savePreferences:(UIButton *)sender
+{
+    sender.selected = !sender.isSelected;
+    
+    CGRect _frame = sender.frame;
+    if (sender.isSelected) {
+        _frame.origin.x += 2;
+        _frame.origin.y -= 2;
+    }else {
+        _frame.origin.x -= 2;
+        _frame.origin.y += 2;
+    }
+    [sender setFrame:_frame];
+    
+    [userPreferences setObject:@(sender.isSelected) forKey:@"SaveAskPreference"];
+    [userPreferences synchronize];
+}
+
+- (void)saveSignatures
+{
+    NSLog(@"Saving Signature");
+}
+
+- (void)showSettings:(UIButton *)sender
+{
+    NSLog(@"Showing settings");
 }
 
 #pragma mark - Notifications
@@ -188,9 +314,20 @@ NSInteger tagClose;
         
         [signatureField setFrame:[self getFieldRect]];
         [signatureField setNeedsDisplay];
-        [[signatureField viewWithTag:tagClose] setFrame:CGRectMake(signatureField.bounds.size.width-80, 0.0f, 80, 30)];
+//        [[signatureField viewWithTag:tagClose] setFrame:CGRectMake(signatureField.bounds.size.width-80, 0.0f, 80, 30)];
         
         [self setNeedsDisplay];
+    }
+}
+
+#pragma mark - UIAlertViewDelegate
+- (void)alertView:(UIAlertView *)alertView didDismissWithButtonIndex:(NSInteger)buttonIndex
+{
+    if (alertView.tag == CLOSE_TAG && buttonIndex == 1) {
+        [self closeActionWithPreview:NO];
+    }else if (alertView.tag == SAVE_TAG) {
+        [userPreferences setObject:@(buttonIndex) forKey:@"SavePreference"];
+        [self closeActionWithPreview:YES];
     }
 }
 
@@ -208,6 +345,9 @@ NSInteger tagClose;
 }
 
 @end
+
+#pragma mark -
+#pragma mark -
 
 @implementation TDSignatureField
 {
@@ -316,6 +456,11 @@ NSInteger tagClose;
 {
     imgRaw = nil;
     [self setImage:imgRaw];
+}
+
+- (void)saveSignature
+{
+    
 }
 
 - (UIImage *)image

@@ -46,7 +46,7 @@
 @property (nonatomic, TD_STRONG) UIImage *image;
 @end
 
-@interface TDSignatureView : UIView
+@interface TDSignatureView : UIView <UIAlertViewDelegate>
 @property (atomic, TD_STRONG) UIView *overlayView;
 @property (atomic, TD_STRONG) TDSignatureField *signatureField;
 @property (atomic, assign) CGRect inBounds;
