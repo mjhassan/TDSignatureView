@@ -12,10 +12,11 @@
 @property (nonatomic, TD_STRONG) UIBezierPath *_bezierPath;
 @property (atomic, assign) uint pointCounter;
 @property (nonatomic, TD_STRONG) UIColor *fieldBackground;
+@property (atomic, assign) BOOL hasEdited;
 
 - (void)doCanvasReset;
 - (void)closeCanvas;
-- (void)saveSignature;
+- (void)doLayoutRefresh;
 
 @end
 
@@ -77,6 +78,7 @@
         signatureField = [TDSignatureField new];
         [signatureField setBackgroundColor:self.backgroundColor];
         [signatureField setOpaque:YES];
+        [signatureField setAutoresizesSubviews:YES];
     }
     
     [signatureField setFrame:self.frame];
@@ -178,9 +180,11 @@
 - (CGRect)getFieldRect
 {
     CGFloat margin = 50.f;
-    CGFloat height = inBounds.size.height * (self.bounds.size.height/self.bounds.size.width);
+    CGFloat width  = (inBounds.size.width-2*margin);
+    CGFloat factor = width / self.bounds.size.width;
+    CGFloat height = self.bounds.size.height * factor;
     
-    return CGRectMake(margin, (inBounds.size.height-height)/2, inBounds.size.width - 2*margin, height);
+    return CGRectMake(margin, (inBounds.size.height-height)/2, width, height);
 }
 
 static NSInteger CLOSE_TAG = 1u << 8;
@@ -188,11 +192,14 @@ static NSInteger SAVE_TAG = 1u << 16;
 - (void)closeView: (UIButton *)sender
 {
     if ([(NSString *)[sender titleForState:UIControlStateNormal] caseInsensitiveCompare:@"CLOSE"] == NSOrderedSame) {
-        UIAlertView *closeAlert = [[UIAlertView alloc] initWithTitle:@"WARNING!" message:@"Closing action will lose signature. Do you really want to continue?" delegate:self cancelButtonTitle:@"NO" otherButtonTitles:@"YES", nil];
-        [closeAlert setTag:CLOSE_TAG];
-        [closeAlert show];
+        if (signatureField.hasEdited) {
+            UIAlertView *closeAlert = [[UIAlertView alloc] initWithTitle:@"WARNING!" message:@"Closing action will lose signature. Do you really want to continue?" delegate:self cancelButtonTitle:@"NO" otherButtonTitles:@"YES", nil];
+            [closeAlert setTag:CLOSE_TAG];
+            [closeAlert show];
+        }else [self closeActionWithPreview:NO];
     }else if ([(NSString *)[sender titleForState:UIControlStateNormal] caseInsensitiveCompare:@"DONE"] == NSOrderedSame)
     {
+        [userPreferences setObject:@0 forKey:@"SaveAskPreference"];
         if(![[userPreferences objectForKey:@"SaveAskPreference"] boolValue]) {
         UIAlertView *closeAlert = [[UIAlertView alloc] initWithTitle:nil message:@"Do you want to save this signature?\nWARNING: Do not save signature if you are on shared device." delegate:self cancelButtonTitle:@"NO" otherButtonTitles:@"OK", nil];
         
@@ -215,9 +222,6 @@ static NSInteger SAVE_TAG = 1u << 16;
         [closeAlert show];
         } else {
             [self closeActionWithPreview:YES];
-            if ([[userPreferences objectForKey:@"SavePreference"] boolValue]) {
-                [self saveSignatures];
-            }
         }
         
     }
@@ -250,10 +254,15 @@ static NSInteger SAVE_TAG = 1u << 16;
     UIGraphicsBeginImageContext(self.bounds.size);
     [signatureField.image drawInRect:self.bounds];
     UIImageView *imgview = [[UIImageView alloc] initWithImage:UIGraphicsGetImageFromCurrentImageContext()];
+    imgview.backgroundColor = [UIColor yellowColor];
     UIGraphicsEndImageContext();
     imgview.tag = PREVIEW_TAG;
     [[self viewWithTag:PREVIEW_TAG] removeFromSuperview];
     [self addSubview:imgview];
+    
+    if (signatureField.image && [[userPreferences objectForKey:@"SavePreference"] boolValue]) {
+        [self saveSignatures];
+    }
 }
 
 - (void)savePreferences:(UIButton *)sender
@@ -305,8 +314,6 @@ static NSInteger SAVE_TAG = 1u << 16;
 
 - (void)setTransformForCurrentOrientation:(BOOL)animated
 {
-    NSLog(@"Frame : %@", NSStringFromCGRect(self.bounds));
-    
     // Stay in sync with the superview
     if (overlayView) {
         [overlayView setFrame:inBounds];
@@ -314,8 +321,8 @@ static NSInteger SAVE_TAG = 1u << 16;
         
         [signatureField setFrame:[self getFieldRect]];
         [signatureField setNeedsDisplay];
-//        [[signatureField viewWithTag:tagClose] setFrame:CGRectMake(signatureField.bounds.size.width-80, 0.0f, 80, 30)];
-        
+        [self drawComponentes];
+        [signatureField doLayoutRefresh];
         [self setNeedsDisplay];
     }
 }
@@ -327,6 +334,7 @@ static NSInteger SAVE_TAG = 1u << 16;
         [self closeActionWithPreview:NO];
     }else if (alertView.tag == SAVE_TAG) {
         [userPreferences setObject:@(buttonIndex) forKey:@"SavePreference"];
+        [userPreferences synchronize];
         [self closeActionWithPreview:YES];
     }
 }
@@ -356,6 +364,7 @@ static NSInteger SAVE_TAG = 1u << 16;
 @synthesize _bezierPath;
 @synthesize fieldBackground;
 @synthesize pointCounter;
+@synthesize hasEdited;
 
 - (id)init
 {
@@ -450,17 +459,25 @@ static NSInteger SAVE_TAG = 1u << 16;
     
     [self setImage:imgRaw];
     pointCounter = 0;
+    hasEdited = YES;
 }
 
 - (void)doCanvasReset
 {
     imgRaw = nil;
     [self setImage:imgRaw];
+    hasEdited = NO;
 }
 
-- (void)saveSignature
+- (void)doLayoutRefresh
 {
+    if(!imgRaw) return;
     
+    UIGraphicsBeginImageContextWithOptions(self.bounds.size, YES, 0.0);
+    [imgRaw drawInRect:self.bounds];
+    imgRaw = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    [self setImage:imgRaw];
 }
 
 - (UIImage *)image
